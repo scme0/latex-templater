@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LatexTemplater", "LatexTemplater\LatexTemplater.csproj", "{E0C8BFFB-ACAF-4C52-9604-8BDE7EC1D358}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LatexTemplater.UnitTests", "LatexTemplater.UnitTests\LatexTemplater.UnitTests.csproj", "{B76C38E8-D58C-44C3-B196-021CBA010FD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0C8BFFB-ACAF-4C52-9604-8BDE7EC1D358}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0C8BFFB-ACAF-4C52-9604-8BDE7EC1D358}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0C8BFFB-ACAF-4C52-9604-8BDE7EC1D358}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0C8BFFB-ACAF-4C52-9604-8BDE7EC1D358}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B76C38E8-D58C-44C3-B196-021CBA010FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B76C38E8-D58C-44C3-B196-021CBA010FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B76C38E8-D58C-44C3-B196-021CBA010FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B76C38E8-D58C-44C3-B196-021CBA010FD6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
