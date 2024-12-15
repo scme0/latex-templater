@@ -1,4 +1,5 @@
 using System.Dynamic;
+using System.Text;
 using YamlDotNet.Serialization;
 
 namespace LatexTemplater;
@@ -11,7 +12,7 @@ public static class Templater
         
         var dataObject = new Deserializer().Deserialize<ExpandoObject>(dataContents);
         
-        var templatedTex = await TemplateTexContent(arguments.latexFile, dataObject, cancellationToken);
+        var templatedTex = await TemplateTexFile(arguments.latexFile, dataObject, cancellationToken);
 
         if (arguments.outputFile != null)
         {
@@ -25,24 +26,45 @@ public static class Templater
         return templatedTex;
     }
 
-    private static async Task<string> TemplateTexContent(string latexFile, object data, CancellationToken cancellationToken)
+    private static async Task<string> TemplateTexFile(string latexFile, object data, CancellationToken cancellationToken)
     {
-
         var tex = await File.ReadAllTextAsync(latexFile, cancellationToken);
+        var texLocation = Directory.GetParent(latexFile)?.FullName;
+        return await TemplateTexContent(tex, texLocation, data, cancellationToken);
+    }
+
+    private static async Task<string> TemplateTexContent(string tex, string? texLocation, object data,
+        CancellationToken cancellationToken)
+    {
         var startIndex = 0;
         var replacements = new Stack<Replacement>();
         while (tex.IndexOf("<<", startIndex, StringComparison.Ordinal) is var openingVar and > -1 &&
                tex.IndexOf(">>", startIndex, StringComparison.Ordinal) is var closingVar && closingVar > openingVar)
         {
-            startIndex = closingVar;
+            startIndex = closingVar + 2;
             var variable = tex.Substring(openingVar + 2, closingVar - openingVar - 2).Trim();
             string resultString;
             if (variable.Contains('|'))
             {
                 var variableParts = variable.Split('|');
                 var varValue = GetVariableValue(data, variableParts[0].Trim());
-                var texLocation = Directory.GetParent(latexFile)?.FullName;
-                resultString = await TemplateTexContent(Path.Join(texLocation, variableParts[1].Trim()), varValue, cancellationToken);
+                if (varValue is List<object> list)
+                {
+                    var innerTexFile = Path.Join(texLocation, variableParts[1].Trim());
+                    var innerTex = await File.ReadAllTextAsync(innerTexFile, cancellationToken);
+                    texLocation = Directory.GetParent(innerTexFile)?.FullName;
+                    var sb = new StringBuilder();
+                    foreach (var item in list)
+                    {
+                        sb.AppendLine(await TemplateTexContent(innerTex, texLocation, item, cancellationToken));
+                    }
+                    resultString = sb.ToString();
+                }
+                else
+                {
+                    resultString = await TemplateTexFile(Path.Join(texLocation, variableParts[1].Trim()), varValue, cancellationToken);
+                }
+
             }
             else
             {
@@ -53,11 +75,12 @@ public static class Templater
             replacements.Push(new Replacement(openingVar, closingVar - openingVar + 2, resultString));
         }
 
-        return replacements.Aggregate(tex, (current, replacement) => current.Remove(replacement.StartIdx, replacement.Length).Insert(replacement.StartIdx, replacement.Value));
+        return replacements.Aggregate(tex, (current, replacement) => current.Remove(replacement.StartIdx, replacement.Length).Insert(replacement.StartIdx, replacement.Value)).Replace("\n\n", "\n");
     }
 
     private static object GetVariableValue(object data, string variable)
     {
+        if (variable == ".") return data;
         return data switch
         {
             IDictionary<string, object> dictionary => GetVariableValue2(
@@ -75,6 +98,7 @@ public static class Templater
         for (var i = 0; i < variableParts.Length; i++)
         {
             var variablePart = variableParts[i];
+            if (variablePart == string.Empty) continue;
             if (i == variableParts.Length - 1)
             {
                 result = currentDictionary[variablePart];
