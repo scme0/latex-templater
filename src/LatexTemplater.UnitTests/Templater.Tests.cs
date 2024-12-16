@@ -43,6 +43,7 @@ public class Tests
             Directory.Delete(temporaryDirectory, true);
         }
     }
+    
     [Test]
     public async Task TwoFileTest()
     {
@@ -83,6 +84,98 @@ public class Tests
             var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile), CancellationToken.None);
             
             result.Should().Be("I want to insert another tex into this file\nhello\nThis is a string that will be inserted into the text file.\ngoodbye\nOther stuff afterwards");
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, true);
+        }
+    }
+    
+    [Test]
+    public async Task TwoFileArrayTest()
+    {
+        var temporaryDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        try
+        {
+            Directory.CreateDirectory(temporaryDirectory);
+            var tex = 
+                """
+                hello
+                << value >>
+                goodbye
+                """;
+            var texBase =
+                """
+                I want to insert another tex into this file
+                << my.cool.inserted.stuff | tex.tex >>
+                Other stuff afterwards
+                """;
+            var yaml =
+                """
+                my:
+                    cool:
+                        inserted:
+                            stuff:
+                                - value: "something"
+                                - value: "something2"
+                                - value: "something3"
+                """;
+            var texFile = Path.Combine(temporaryDirectory, "tex.tex");
+            var texBaseFile = Path.Combine(temporaryDirectory, "texBase.tex");
+            var yamlFile = Path.Combine(temporaryDirectory, "yaml.yaml");
+            await File.WriteAllTextAsync(texFile, tex);
+            await File.WriteAllTextAsync(texBaseFile, texBase);
+            await File.WriteAllTextAsync(yamlFile, yaml);
+        
+            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile), CancellationToken.None);
+            
+            result.Should().Be("I want to insert another tex into this file\nhello\nsomething\ngoodbye\nhello\nsomething2\ngoodbye\nhello\nsomething3\ngoodbye\nOther stuff afterwards");
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, true);
+        }
+    }
+    
+    [Test]
+    public async Task TwoFileArrayDotPropertyTest()
+    {
+        var temporaryDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        try
+        {
+            Directory.CreateDirectory(temporaryDirectory);
+            var tex = 
+                """
+                hello
+                << . >>
+                goodbye
+                """;
+            var texBase =
+                """
+                I want to insert another tex into this file
+                << my.cool.inserted.stuff | tex.tex >>
+                Other stuff afterwards
+                """;
+            var yaml =
+                """
+                my:
+                    cool:
+                        inserted:
+                            stuff:
+                                - "something"
+                                - "something2"
+                                - "something3"
+                """;
+            var texFile = Path.Combine(temporaryDirectory, "tex.tex");
+            var texBaseFile = Path.Combine(temporaryDirectory, "texBase.tex");
+            var yamlFile = Path.Combine(temporaryDirectory, "yaml.yaml");
+            await File.WriteAllTextAsync(texFile, tex);
+            await File.WriteAllTextAsync(texBaseFile, texBase);
+            await File.WriteAllTextAsync(yamlFile, yaml);
+        
+            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile), CancellationToken.None);
+            
+            result.Should().Be("I want to insert another tex into this file\nhello\nsomething\ngoodbye\nhello\nsomething2\ngoodbye\nhello\nsomething3\ngoodbye\nOther stuff afterwards");
         }
         finally
         {
