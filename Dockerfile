@@ -18,5 +18,5 @@ LABEL com.github.actions.icon="edit"
 LABEL com.github.actions.color="violet"
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled-extra
-COPY --from=build-env /app/out .
-ENTRYPOINT [ "./LatexTemplater" ]
+COPY --from=build-env /app/out app
+ENTRYPOINT [ "./app/LatexTemplater" ]
