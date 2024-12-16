@@ -12,7 +12,7 @@ public static class Templater
         
         var dataObject = new Deserializer().Deserialize<ExpandoObject>(dataContents);
         
-        var templatedTex = await TemplateTexFile(arguments.latexFile, dataObject, cancellationToken);
+        var templatedTex = await TemplateTexFile(arguments.latexFile, dataObject, arguments.delimiters, cancellationToken);
 
         if (arguments.outputFile != null)
         {
@@ -26,23 +26,27 @@ public static class Templater
         return templatedTex;
     }
 
-    private static async Task<string> TemplateTexFile(string latexFile, object data, CancellationToken cancellationToken)
+    private static async Task<string> TemplateTexFile(string latexFile, object data, string[] delimiters, CancellationToken cancellationToken)
     {
         var tex = await File.ReadAllTextAsync(latexFile, cancellationToken);
         var texLocation = Directory.GetParent(latexFile)?.FullName;
-        return await TemplateTexContent(tex, texLocation, data, cancellationToken);
+        return await TemplateTexContent(tex, texLocation, data, delimiters, cancellationToken);
     }
 
-    private static async Task<string> TemplateTexContent(string tex, string? texLocation, object data,
+    private static async Task<string> TemplateTexContent(
+        string tex, 
+        string? texLocation, 
+        object data, 
+        string[] delimiters,
         CancellationToken cancellationToken)
     {
         var startIndex = 0;
         var replacements = new Stack<Replacement>();
-        while (tex.IndexOf("<<", startIndex, StringComparison.Ordinal) is var openingVar and > -1 &&
-               tex.IndexOf(">>", startIndex, StringComparison.Ordinal) is var closingVar && closingVar > openingVar)
+        while (tex.IndexOf(delimiters[0], startIndex, StringComparison.Ordinal) is var openingVar and > -1 &&
+               tex.IndexOf(delimiters[1], startIndex, StringComparison.Ordinal) is var closingVar && closingVar > openingVar)
         {
-            startIndex = closingVar + 2;
-            var variable = tex.Substring(openingVar + 2, closingVar - openingVar - 2).Trim();
+            startIndex = closingVar + delimiters[1].Length;
+            var variable = tex.Substring(openingVar + delimiters[0].Length, closingVar - openingVar - delimiters[0].Length).Trim();
             string resultString;
             if (variable.Contains('|'))
             {
@@ -56,13 +60,15 @@ public static class Templater
                     var sb = new StringBuilder();
                     foreach (var item in list)
                     {
-                        sb.AppendLine(await TemplateTexContent(innerTex, texLocation, item, cancellationToken));
+                        sb.AppendLine(await TemplateTexContent(innerTex, texLocation, item, delimiters,
+                            cancellationToken));
                     }
                     resultString = sb.ToString();
                 }
                 else
                 {
-                    resultString = await TemplateTexFile(Path.Join(texLocation, variableParts[1].Trim()), varValue, cancellationToken);
+                    resultString = await TemplateTexFile(Path.Join(texLocation, variableParts[1].Trim()), varValue,
+                        delimiters, cancellationToken);
                 }
 
             }
@@ -72,10 +78,12 @@ public static class Templater
                 if (varValue == null) throw new Exception($"Variable {variable} not found");
                 resultString = varValue.ToString()!;
             }
-            replacements.Push(new Replacement(openingVar, closingVar - openingVar + 2, resultString));
+            replacements.Push(new Replacement(openingVar, closingVar - openingVar + delimiters[1].Length, resultString));
         }
 
-        return replacements.Aggregate(tex, (current, replacement) => current.Remove(replacement.StartIdx, replacement.Length).Insert(replacement.StartIdx, replacement.Value)).Replace("\n\n", "\n");
+        return replacements.Aggregate(tex,
+            (current, replacement) => current.Remove(replacement.StartIdx, replacement.Length)
+                .Insert(replacement.StartIdx, replacement.Value)).Replace("\n\n", "\n");
     }
 
     private static object GetVariableValue(object data, string variable)

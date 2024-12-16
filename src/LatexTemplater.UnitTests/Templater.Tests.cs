@@ -34,7 +34,42 @@ public class Tests
             await File.WriteAllTextAsync(texFile, tex);
             await File.WriteAllTextAsync(yamlFile, yaml);
         
-            var result = await Templater.Execute(new CommandLineArguments(texFile, yamlFile), CancellationToken.None);
+            var result = await Templater.Execute(new CommandLineArguments(texFile, yamlFile, ["<<",">>"]), CancellationToken.None);
+            
+            result.Should().Be("hello\nThis is a string that will be inserted into the text file.\ngoodbye");
+        }
+        finally
+        {
+            Directory.Delete(temporaryDirectory, true);
+        }
+    }
+    
+    [Test]
+    public async Task BasicTest2()
+    {
+        var temporaryDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        try
+        {
+            Directory.CreateDirectory(temporaryDirectory);
+            var tex = 
+                """
+                hello
+                <<< my.cool.variable >>
+                goodbye
+                """;
+            var yaml =
+                """
+                my:
+                    cool:
+                        variable:
+                            "This is a string that will be inserted into the text file."
+                """;
+            var texFile = Path.Combine(temporaryDirectory, "tex.tex");
+            var yamlFile = Path.Combine(temporaryDirectory, "yaml.yaml");
+            await File.WriteAllTextAsync(texFile, tex);
+            await File.WriteAllTextAsync(yamlFile, yaml);
+        
+            var result = await Templater.Execute(new CommandLineArguments(texFile, yamlFile, ["<<<",">>"]), CancellationToken.None);
             
             result.Should().Be("hello\nThis is a string that will be inserted into the text file.\ngoodbye");
         }
@@ -81,7 +116,7 @@ public class Tests
             await File.WriteAllTextAsync(texBaseFile, texBase);
             await File.WriteAllTextAsync(yamlFile, yaml);
         
-            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile), CancellationToken.None);
+            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile, ["<<",">>"]), CancellationToken.None);
             
             result.Should().Be("I want to insert another tex into this file\nhello\nThis is a string that will be inserted into the text file.\ngoodbye\nOther stuff afterwards");
         }
@@ -127,7 +162,7 @@ public class Tests
             await File.WriteAllTextAsync(texBaseFile, texBase);
             await File.WriteAllTextAsync(yamlFile, yaml);
         
-            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile), CancellationToken.None);
+            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile, ["<<",">>"]), CancellationToken.None);
             
             result.Should().Be("I want to insert another tex into this file\nhello\nsomething\ngoodbye\nhello\nsomething2\ngoodbye\nhello\nsomething3\ngoodbye\nOther stuff afterwards");
         }
@@ -173,7 +208,7 @@ public class Tests
             await File.WriteAllTextAsync(texBaseFile, texBase);
             await File.WriteAllTextAsync(yamlFile, yaml);
         
-            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile), CancellationToken.None);
+            var result = await Templater.Execute(new CommandLineArguments(texBaseFile, yamlFile, ["<<",">>"]), CancellationToken.None);
             
             result.Should().Be("I want to insert another tex into this file\nhello\nsomething\ngoodbye\nhello\nsomething2\ngoodbye\nhello\nsomething3\ngoodbye\nOther stuff afterwards");
         }

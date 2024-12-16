@@ -25,5 +25,3 @@ catch (Exception e)
     Console.Error.WriteLine(e.Message);
     return -1;
 }
-
-// latemp /path/to/document.tex path/to/data.yaml -o /path/to/templated.tex
