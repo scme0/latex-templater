@@ -1,0 +1,43 @@
+name: 'tmpltr'
+description: 'A simple generic templating engine'
+branding:
+  icon: edit
+  color: violet
+inputs:
+  template:
+    description:
+      'The template file'
+    required: true
+  data:
+    description:
+      'The yaml file'
+    required: true
+  output:
+    description:
+      'The output file path'
+    required: true
+  delimiter:
+    description:
+      'The delimiter for variable injection'
+    required: false
+    default: '<< >>'
+outputs:
+  summary-title:
+    description:
+      'The title of the code metrics action.'
+  summary-details:
+    description:
+      'A detailed summary of all the projects that were flagged.'
+  updated-metrics:
+    description:
+      'A boolean value, indicating whether or not the action updated metrics.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+  - '-o'
+  - ${{ inputs.output }}
+  - '-d'
+  - ${{ inputs.delimiter }}
+  - ${{ inputs.template }}
+  - ${{ inputs.data }}

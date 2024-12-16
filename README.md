@@ -20,8 +20,8 @@ Format:
 
 CommandLine args:
 
-`tmpltr [-p '{{ }}'] path/to/basetemplate.tex path/to/data.yaml [-o path/to/output.tex]`
+`tmpltr [-d '{{ }}'] path/to/basetemplate.tex path/to/data.yaml [-o path/to/output.tex]`
 
 `-o` is to specify an output file. If you don't specify it, the result will be sent to stdout.
 
-`-p` is to specify the injection marker for properties. The default is '<< >>' but you can specify anything as long as the end is different to the start (eg: NOT `$$ $$`). The format to put in the command line arg is `<start><space><end>`. It can be longer than 2 chars. eg: `~:> <:~`
+`-d` is to specify the injection marker for properties. The default is '<< >>' but you can specify anything as long as the end is different to the start (eg: NOT `$$ $$`). The format to put in the command line arg is `<start><space><end>`. It can be longer than 2 chars. eg: `~:> <:~`
