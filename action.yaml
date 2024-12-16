@@ -21,16 +21,6 @@ inputs:
       'The delimiter for variable injection'
     required: false
     default: '<< >>'
-outputs:
-  summary-title:
-    description:
-      'The title of the code metrics action.'
-  summary-details:
-    description:
-      'A detailed summary of all the projects that were flagged.'
-  updated-metrics:
-    description:
-      'A boolean value, indicating whether or not the action updated metrics.'
 runs:
   using: 'docker'
   image: 'Dockerfile'
