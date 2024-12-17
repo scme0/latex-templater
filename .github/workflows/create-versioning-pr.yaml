@@ -1,0 +1,41 @@
+name: Create or Update Versioning PR 
+
+on:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: write
+  pull-requests: write 
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+
+    # For all pushes that aren't creating a versioning commit
+    if: ${{ !startsWith(github.event.commits[0].message, 'Version Package') }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: setup-node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    
+    - run: npm ci
+
+    - name: Install YQ
+      uses: dcarbone/install-yq-action@v1.1.1
+
+    - name: Create Release Pull Request
+      id: changesets
+      uses: changesets/action@v1
+      with:
+        commit: 'Version Package'
+        title: 'Version Package'
+        createGitHubReleases: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -4,3 +4,4 @@ obj
 .idea
 *.DotSettings.user
 out
+node_modules
