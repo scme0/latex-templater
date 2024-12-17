@@ -2,7 +2,7 @@ using System.Dynamic;
 using System.Text;
 using YamlDotNet.Serialization;
 
-namespace LatexTemplater;
+namespace Tmpltr;
 
 public static class Templater
 {
@@ -12,7 +12,7 @@ public static class Templater
         
         var dataObject = new Deserializer().Deserialize<ExpandoObject>(dataContents);
         
-        var templatedTex = await TemplateTexFile(arguments.latexFile, dataObject, arguments.delimiters, cancellationToken);
+        var templatedTex = await TemplateTexFile(arguments.templateFile, dataObject, arguments.delimiters, cancellationToken);
 
         if (arguments.outputFile != null)
         {
@@ -26,10 +26,10 @@ public static class Templater
         return templatedTex;
     }
 
-    private static async Task<string> TemplateTexFile(string latexFile, object data, string[] delimiters, CancellationToken cancellationToken)
+    private static async Task<string> TemplateTexFile(string templateFile, object data, string[] delimiters, CancellationToken cancellationToken)
     {
-        var tex = await File.ReadAllTextAsync(latexFile, cancellationToken);
-        var texLocation = Directory.GetParent(latexFile)?.FullName;
+        var tex = await File.ReadAllTextAsync(templateFile, cancellationToken);
+        var texLocation = Directory.GetParent(templateFile)?.FullName;
         return await TemplateTexContent(tex, texLocation, data, delimiters, cancellationToken);
     }
 

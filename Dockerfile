@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-env
 
 WORKDIR /app
 COPY . ./
-RUN dotnet publish ./src/LatexTemplater/LatexTemplater.csproj -c Release -o out
+RUN dotnet publish ./src/Tmpltr/Tmpltr.csproj -c Release -o out
 
 LABEL maintainer="Scott Merchant <scottyjoe9@gmail.com>"
 LABEL repository="https://github.com/scme0/tmpltr"
@@ -20,4 +20,4 @@ LABEL com.github.actions.color="violet"
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled-extra
 USER root
 COPY --from=build-env /app/out app
-ENTRYPOINT [ "/app/LatexTemplater" ]
+ENTRYPOINT [ "/app/Tmpltr" ]
