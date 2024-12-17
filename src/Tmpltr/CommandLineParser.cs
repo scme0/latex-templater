@@ -1,13 +1,13 @@
-namespace LatexTemplater;
+namespace Tmpltr;
 
 public static class CommandLineParser
 {
-    private const string UsageString = "Usage: latemp <latexfile> <datafile> [-o <outputfile>] [-d '<start><space><end>']";
+    private const string UsageString = "Usage: latemp <template-file> <data-file> [-o <output-file>] [-d '<start><space><end>']";
 
     public static CommandLineArguments? Parse(string[] commandLineArgs)
     {
         bool outputFileNext = false, delimiterNext = false;
-        string? latexFile = null, dataFile = null, outputFile = null, delimiter = null;
+        string? templateFile = null, dataFile = null, outputFile = null, delimiter = null;
         foreach (var arg in commandLineArgs)
         {
             if (outputFileNext)
@@ -45,9 +45,9 @@ public static class CommandLineParser
                     continue;
                 default:
                 {
-                    if (latexFile == null)
+                    if (templateFile == null)
                     {
-                        latexFile = arg;
+                        templateFile = arg;
                     } else if (dataFile == null)
                     {
                         dataFile = arg;
@@ -61,15 +61,15 @@ public static class CommandLineParser
                 }
             }
         }
-        if (latexFile == null || dataFile == null) 
+        if (templateFile == null || dataFile == null) 
             throw new Exception($"Requires at least two arguments: {UsageString}");
 
         var delimiters = delimiter?.Split(' ');
         if (delimiters is not null and not { Length: 2 }) 
             throw new Exception($"delimiters are not formatted correctly ('{delimiter}'): {UsageString}"); 
         
-        return new CommandLineArguments(latexFile, dataFile, delimiters ?? ["<<",">>"], outputFile);
+        return new CommandLineArguments(templateFile, dataFile, delimiters ?? ["<<",">>"], outputFile);
     }
 }
 
-public record CommandLineArguments(string latexFile, string dataFile, string[] delimiters, string? outputFile = null);
+public record CommandLineArguments(string templateFile, string dataFile, string[] delimiters, string? outputFile = null);

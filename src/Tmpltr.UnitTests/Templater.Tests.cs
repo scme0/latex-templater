@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace LatexTemplater.UnitTests;
+namespace Tmpltr.UnitTests;
 
 public class Tests
 {
