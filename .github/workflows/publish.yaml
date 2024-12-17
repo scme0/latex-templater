@@ -1,0 +1,39 @@
+name: Version Package 
+
+on:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: ${{ startsWith(github.event.commits[0].message, 'Version Package') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Get Version
+        id: get-version
+        run: |
+          version=$(jq -r .version package.json)
+          echo "versionToPublish=$version" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: changesets/action@v1
+        with:
+          publish: "npx @changesets/cli tag"
+          createGitHubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
