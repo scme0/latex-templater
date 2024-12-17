@@ -20,4 +20,4 @@ LABEL com.github.actions.color="violet"
 FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-noble-chiseled-extra
 USER root
 COPY --from=build-env /app/out app
-ENTRYPOINT [ "/app/Tmpltr" ]
+ENTRYPOINT [ "/app/tmpltr" ]
